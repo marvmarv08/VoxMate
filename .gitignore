@@ -7,6 +7,16 @@ local.properties
 
 # Log/OS Files
 *.log
+.DS_Store
+
+# Web app dependencies and generated output
+node_modules/
+dist/
+coverage/
+artifacts/
+.env
+.env.*
+!.env.example
 
 # Android Studio generated files and folders
 captures/
