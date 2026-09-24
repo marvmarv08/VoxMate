@@ -31,7 +31,7 @@ try {
 
   await page.getByLabel('Schedule title').fill('Thesis consultation')
   await page.getByLabel('Date').fill('2026-09-28')
-  await page.getByLabel('Time').fill('13:30')
+  await page.getByLabel('Start time').fill('13:30')
   await page.getByLabel(/Notes/).fill('Bring the revised chapter')
   await page.getByRole('button', { name: 'Save to JR' }).click()
   await assertVisible(page.getByText('Thesis consultation'))
@@ -56,8 +56,38 @@ try {
   await assertVisible(page.getByRole('alert'))
   await assertVisible(page.getByText('Thesis consultation'))
 
+  await page.getByLabel('Import schedule file').setInputFiles({
+    name: 'weekly-classes.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify([
+      {
+        title: 'IT 313 – System Analysis and Design',
+        recurrence: 'weekly',
+        dayOfWeek: 'Wednesday',
+        time: '14:00',
+        endTime: '16:00',
+        teacher: 'Mr. Bucad',
+        room: 'CICS 301',
+      },
+      {
+        title: 'BAT 401 – Fundamentals of Business Analytics',
+        recurrence: 'weekly',
+        dayOfWeek: 'Wednesday',
+        time: '16:00',
+        endTime: '19:00',
+        teacher: 'Mr. Bucad',
+        room: 'COM LAB 4',
+      },
+    ])),
+  })
+  await assertVisible(page.getByText('Every Wednesday').first())
+
   await page.getByRole('button', { name: 'Talk to JR' }).click()
   await assertVisible(page.getByRole('dialog', { name: 'JR voice assistant' }))
+  await page.getByLabel('Ask JR a schedule question').fill('What is my schedule on Wednesday?')
+  await page.getByRole('button', { name: 'Ask JR' }).click()
+  await assertVisible(page.getByRole('heading', { name: 'Your Wednesday schedule' }))
+  await assertVisible(page.getByRole('list', { name: 'Wednesday schedules' }))
   await page.screenshot({ path: new URL('desktop-popup.png', artifactDirectory).pathname, fullPage: true })
   await page.getByRole('button', { name: 'Close JR' }).click()
 
@@ -75,8 +105,18 @@ try {
   await assertVisible(page.getByText('Thesis consultation'))
   await page.screenshot({ path: new URL('mobile.png', artifactDirectory).pathname, fullPage: true })
 
+  await page.getByRole('button', { name: 'Talk to JR' }).click()
+  await page.getByLabel('Ask JR a schedule question').fill('Show my Wednesday classes')
+  await page.getByRole('button', { name: 'Ask JR' }).click()
+  await assertVisible(page.getByRole('heading', { name: 'Your Wednesday schedule' }))
+  const mobileDialogOverflow = await page.getByRole('dialog').evaluate(
+    (dialog) => dialog.scrollWidth > dialog.clientWidth,
+  )
+  assert.equal(mobileDialogOverflow, false, 'mobile assistant dialog should not overflow horizontally')
+  await page.screenshot({ path: new URL('mobile-query.png', artifactDirectory).pathname })
+
   assert.deepEqual(browserErrors, [], `browser emitted errors:\n${browserErrors.join('\n')}`)
-  console.log('Browser smoke passed: desktop popup, persistence, imports, deletion, and mobile layout.')
+  console.log('Browser smoke passed: weekly query, persistence, imports, deletion, and mobile layout.')
 } finally {
   await browser.close()
 }

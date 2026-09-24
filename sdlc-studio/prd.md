@@ -1,13 +1,13 @@
 # Product Requirements Document
 
 **Project:** JR Voice Assistant  
-**Version:** 0.1  
+**Version:** 0.2
 **Last Updated:** 2026-09-23  
 **Status:** Draft
 
 ## 1. Project Overview
 
-JR is a cross-platform personal voice assistant that can remember information explicitly provided by its user. The first milestone proves a smaller vertical slice: local schedule memory plus an in-app voice wake experience.
+JR is a cross-platform personal voice assistant that can remember information explicitly provided by its user. The current milestone adds recurring weekly schedule memory and grounded weekday answers to the in-app voice wake experience.
 
 ## 2. Problem Statement
 
@@ -21,12 +21,14 @@ Marvin is the primary user for the MVP. He wants to manage his schedule without 
 
 | Feature | Description | Status | Priority |
 | --- | --- | --- | --- |
-| Schedule memory | Add, view, persist, and delete schedule entries locally | Not Started | Must Have |
-| Schedule import | Import validated JSON or CSV schedule data | Not Started | Must Have |
-| JR identity | Use the approved circular portrait throughout the app | Not Started | Must Have |
-| In-app wake experience | Detect “Hey JR” while listening is enabled and the app is open | Not Started | Must Have |
-| Spoken greeting | Show JR and speak “Hello, Marvin. How can I help you?” | Not Started | Must Have |
-| Compatibility fallback | Explain when speech recognition is unavailable and retain manual activation | Not Started | Must Have |
+| Schedule memory | Add, view, persist, and delete schedule entries locally | Done | Must Have |
+| Schedule import | Import validated JSON or CSV schedule data | Done | Must Have |
+| JR identity | Use the approved circular portrait throughout the app | Done | Must Have |
+| In-app wake experience | Detect “Hey JR” while listening is enabled and the app is open | Done | Must Have |
+| Spoken greeting | Show JR and speak “Hello, Marvin. How can I help you?” | Done | Must Have |
+| Compatibility fallback | Explain when speech recognition is unavailable and retain manual activation | Done | Must Have |
+| Weekly schedules | Store recurring weekday classes with structured details | Done | Must Have |
+| Weekday schedule answers | Show and speak stored schedules for a requested weekday | Done | Must Have |
 
 ## 4. Functional Requirements
 
@@ -38,6 +40,10 @@ Marvin is the primary user for the MVP. He wants to manage his schedule without 
 6. The user must explicitly enable microphone listening.
 7. When supported recognition hears “Hey JR”, the JR popup appears and the device speaks the configured greeting.
 8. The user can manually open or close the JR popup without voice recognition.
+9. The user can add or import a weekly schedule with a weekday and start time plus optional end time, teacher, room, and notes.
+10. A transcript containing schedule intent and an English weekday returns only matching saved records in time order.
+11. The spoken answer and visual result cards are derived from the same stored records.
+12. A manual question input provides the same deterministic answer when voice recognition is unavailable.
 
 ## 5. Non-Functional Requirements
 
@@ -49,7 +55,7 @@ Marvin is the primary user for the MVP. He wants to manage his schedule without 
 
 ## 6. Data Architecture
 
-Each schedule item contains a unique identifier, title, ISO date, 24-hour time, optional notes, and creation timestamp. The MVP stores only these records and UI preferences locally.
+Each schedule item contains a unique identifier, title, start time, recurrence type, optional date or weekday, optional end time, teacher, room, notes, and creation timestamp. New fields remain optional so existing version-1 browser records continue to load.
 
 ## 7. Out of Scope
 
@@ -70,3 +76,4 @@ Each schedule item contains a unique identifier, title, ISO date, 24-hour time, 
 | Date | Version | Changes |
 | --- | --- | --- |
 | 2026-09-23 | 0.1 | Defined the first schedule-memory and spoken wake experience. |
+| 2026-09-23 | 0.2 | Added recurring weekly schedules and grounded weekday voice/text answers. |

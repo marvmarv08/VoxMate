@@ -16,7 +16,12 @@ function looksLikeScheduleItem(value: unknown): value is ScheduleItem {
     typeof item.date === 'string' &&
     typeof item.time === 'string' &&
     typeof item.createdAt === 'string' &&
-    (item.notes === undefined || typeof item.notes === 'string')
+    (item.notes === undefined || typeof item.notes === 'string') &&
+    (item.recurrence === undefined || item.recurrence === 'once' || item.recurrence === 'weekly') &&
+    (item.dayOfWeek === undefined || typeof item.dayOfWeek === 'string') &&
+    (item.endTime === undefined || typeof item.endTime === 'string') &&
+    (item.teacher === undefined || typeof item.teacher === 'string') &&
+    (item.room === undefined || typeof item.room === 'string')
   )
 }
 

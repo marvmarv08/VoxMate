@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { VoiceStatus } from './types'
 import { containsWakePhrase, GREETING, speak } from './voice'
 
+type ResponseResolver = (transcript: string) => string | null
+
 interface SpeechRecognitionResultLike {
   0?: { transcript: string }
 }
@@ -36,12 +38,14 @@ declare global {
   }
 }
 
-export function useVoiceAssistant() {
+export function useVoiceAssistant(resolveResponse?: ResponseResolver) {
   const [isSupported] = useState(
     () => Boolean(window.SpeechRecognition ?? window.webkitSpeechRecognition),
   )
   const [isListening, setIsListening] = useState(false)
   const [assistantOpen, setAssistantOpen] = useState(false)
+  const [assistantMessage, setAssistantMessage] = useState(GREETING)
+  const [lastTranscript, setLastTranscript] = useState('')
   const [status, setStatus] = useState<VoiceStatus>(() =>
     window.SpeechRecognition ?? window.webkitSpeechRecognition ? 'idle' : 'unsupported',
   )
@@ -50,6 +54,11 @@ export function useVoiceAssistant() {
   const listeningEnabledRef = useRef(false)
   const speakingRef = useRef(false)
   const assistantOpenRef = useRef(false)
+  const resolverRef = useRef(resolveResponse)
+
+  useEffect(() => {
+    resolverRef.current = resolveResponse
+  }, [resolveResponse])
 
   const startRecognition = useCallback(() => {
     const recognition = recognitionRef.current
@@ -65,21 +74,36 @@ export function useVoiceAssistant() {
     }
   }, [])
 
-  const greet = useCallback(() => {
+  const openWithMessage = useCallback((message: string, transcript = '') => {
     const recognition = recognitionRef.current
     recognition?.abort()
+    window.speechSynthesis?.cancel()
     setIsListening(false)
     speakingRef.current = true
     assistantOpenRef.current = true
     setAssistantOpen(true)
+    setAssistantMessage(message)
+    setLastTranscript(transcript)
     setStatus('speaking')
 
-    speak(GREETING, () => {
+    speak(message, () => {
       speakingRef.current = false
       if (listeningEnabledRef.current) startRecognition()
       else setStatus(isSupported ? 'idle' : 'unsupported')
     })
   }, [isSupported, startRecognition])
+
+  const greet = useCallback(() => {
+    openWithMessage(GREETING)
+  }, [openWithMessage])
+
+  const answerQuestion = useCallback((transcript: string) => {
+    const response = resolverRef.current?.(transcript)
+    openWithMessage(
+      response ?? 'Try asking, “What is my schedule on Wednesday?”',
+      transcript,
+    )
+  }, [openWithMessage])
 
   useEffect(() => {
     const Recognition = window.SpeechRecognition ?? window.webkitSpeechRecognition
@@ -92,8 +116,13 @@ export function useVoiceAssistant() {
     recognition.onresult = (event) => {
       const lastResult = event.results[event.results.length - 1]
       const transcript = lastResult?.[0]?.transcript ?? ''
-      if (containsWakePhrase(transcript) && !assistantOpenRef.current && !speakingRef.current) {
-        greet()
+      if (speakingRef.current) return
+
+      const response = resolverRef.current?.(transcript)
+      if (response) {
+        openWithMessage(response, transcript)
+      } else if (containsWakePhrase(transcript) && !assistantOpenRef.current) {
+        openWithMessage(GREETING, transcript)
       }
     }
     recognition.onerror = (event) => {
@@ -121,7 +150,7 @@ export function useVoiceAssistant() {
       recognition.abort()
       window.speechSynthesis?.cancel()
     }
-  }, [greet, startRecognition])
+  }, [openWithMessage, startRecognition])
 
   const enableListening = useCallback(() => {
     if (!recognitionRef.current) return
@@ -147,6 +176,8 @@ export function useVoiceAssistant() {
 
   return {
     assistantOpen,
+    assistantMessage,
+    answerQuestion,
     closeAssistant,
     disableListening,
     enableListening,
@@ -154,6 +185,7 @@ export function useVoiceAssistant() {
     greet,
     isListening,
     isSupported,
+    lastTranscript,
     status,
   }
 }

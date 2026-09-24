@@ -59,6 +59,46 @@ describe('schedule memory', () => {
     expect(result[0]?.notes).toBe('Bring laptop, charger')
   })
 
+  it('imports and validates a recurring weekly class', () => {
+    const result = parseScheduleFile(
+      JSON.stringify([
+        {
+          title: 'IT 313 – System Analysis and Design',
+          recurrence: 'weekly',
+          dayOfWeek: 'Wednesday',
+          time: '14:00',
+          endTime: '16:00',
+          teacher: 'Mr. Bucad',
+          room: 'CICS 301',
+        },
+      ]),
+      'classes.json',
+      fixedId,
+      fixedNow,
+    )
+
+    expect(result[0]).toMatchObject({
+      recurrence: 'weekly',
+      dayOfWeek: 'Wednesday',
+      date: '',
+      time: '14:00',
+      endTime: '16:00',
+      teacher: 'Mr. Bucad',
+      room: 'CICS 301',
+    })
+  })
+
+  it('rejects a weekly class without a valid weekday', () => {
+    expect(() =>
+      parseScheduleFile(
+        JSON.stringify([{ title: 'Class', recurrence: 'weekly', dayOfWeek: 'Funday', time: '09:00' }]),
+        'classes.json',
+        fixedId,
+        fixedNow,
+      ),
+    ).toThrow('needs a valid dayOfWeek')
+  })
+
   it('rejects the complete import when any row is invalid', () => {
     expect(() =>
       parseScheduleFile(

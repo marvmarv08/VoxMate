@@ -1,14 +1,17 @@
 # JR Voice Assistant
 
-JR is a cross-platform personal voice-assistant project that will remember information Marvin chooses to provide. This first MVP focuses on one dependable memory type: schedules.
+JR is a cross-platform personal voice-assistant project that remembers information Marvin chooses to provide. The current MVP focuses on one dependable memory type: one-time and recurring weekly schedules.
 
 ## What works now
 
 - Add, view, and delete personal schedules.
+- Save recurring weekly classes with start/end time, teacher, and room.
 - Import schedules from JSON or CSV files.
 - Keep schedule data locally in the current browser using `localStorage`.
 - Open JR manually and hear: “Hello, Marvin. How can I help you?”
 - Opt in to “Hey JR” wake listening while the app is open, when the browser supports speech recognition.
+- Ask “What is my schedule on Wednesday?” and receive a spoken answer plus matching schedule cards.
+- Type the same question manually when speech recognition is unavailable.
 - Continue using every schedule feature when voice recognition is unavailable.
 
 The supplied circular JR portrait is used for both the app identity and the assistant popup. The area outside its black circle is transparent.
@@ -39,6 +42,22 @@ JSON files contain an array of schedules:
 ]
 ```
 
+Weekly schedules use `recurrence` and `dayOfWeek` instead of a date:
+
+```json
+[
+  {
+    "title": "IT 313 – System Analysis and Design",
+    "recurrence": "weekly",
+    "dayOfWeek": "Wednesday",
+    "time": "14:00",
+    "endTime": "16:00",
+    "teacher": "Mr. Bucad",
+    "room": "CICS 301"
+  }
+]
+```
+
 CSV files use the same field names:
 
 ```csv
@@ -46,7 +65,7 @@ title,date,time,notes
 Thesis consultation,2026-09-28,13:30,Bring the revised chapter
 ```
 
-`notes` is optional. An invalid import is rejected as a whole, so it does not erase or partially change existing memory.
+`notes`, `endTime`, `teacher`, and `room` are optional. An invalid import is rejected as a whole, so it does not erase or partially change existing memory.
 
 ## Quality checks
 

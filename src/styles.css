@@ -33,6 +33,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -44,6 +45,7 @@ button,
 
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
 textarea:focus-visible,
 .upload-button:focus-within,
 a:focus-visible {
@@ -425,6 +427,7 @@ label span {
 }
 
 input,
+select,
 textarea {
   width: 100%;
   border: 1px solid #d9d2c6;
@@ -434,7 +437,8 @@ textarea {
   transition: border 160ms ease, box-shadow 160ms ease;
 }
 
-input {
+input,
+select {
   min-height: 47px;
   padding: 0 14px;
 }
@@ -446,6 +450,7 @@ textarea {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   border-color: rgba(228, 91, 67, 0.65);
   box-shadow: 0 0 0 4px rgba(228, 91, 67, 0.08);
@@ -616,6 +621,12 @@ textarea:focus {
   text-transform: uppercase;
 }
 
+.weekly-tile strong {
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .schedule-meta {
   color: var(--accent-dark);
   font-size: 0.7rem;
@@ -684,8 +695,10 @@ footer {
 
 .assistant-dialog {
   position: relative;
-  width: min(520px, 100%);
-  padding: 54px 42px 44px;
+  width: min(680px, 100%);
+  max-height: calc(100vh - 48px);
+  padding: 42px;
+  overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 34px;
   color: #f8f5ee;
@@ -717,9 +730,9 @@ footer {
 
 .dialog-orb {
   position: relative;
-  width: 240px;
-  height: 240px;
-  margin: 0 auto 28px;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 22px;
   display: grid;
   place-items: center;
 }
@@ -745,8 +758,8 @@ footer {
 .dialog-orb img {
   position: relative;
   z-index: 1;
-  width: 184px;
-  height: 184px;
+  width: 138px;
+  height: 138px;
   object-fit: contain;
   filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.3));
 }
@@ -762,9 +775,104 @@ footer {
 .assistant-dialog h2 {
   margin: 0;
   font-family: "Avenir Next", Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  font-size: clamp(1.55rem, 4vw, 2.25rem);
   line-height: 1.15;
   letter-spacing: -0.05em;
+}
+
+.assistant-dialog.has-schedule-answer .dialog-orb {
+  width: 126px;
+  height: 126px;
+  margin-bottom: 16px;
+}
+
+.assistant-dialog.has-schedule-answer .dialog-orb img {
+  width: 96px;
+  height: 96px;
+}
+
+.dialog-summary {
+  margin: 7px 0 0;
+  color: #aaa69e;
+  font-size: 0.8rem;
+}
+
+.assistant-results {
+  max-height: 220px;
+  margin: 22px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  overflow-y: auto;
+  list-style: none;
+  text-align: left;
+}
+
+.assistant-results li {
+  padding: 11px 13px;
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.assistant-results time {
+  color: #ef725c;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.assistant-results span {
+  display: grid;
+  gap: 3px;
+}
+
+.assistant-results strong {
+  font-size: 0.88rem;
+}
+
+.assistant-results small {
+  color: #aaa69e;
+  font-size: 0.73rem;
+}
+
+.assistant-question {
+  margin-top: 22px;
+  gap: 8px;
+  text-align: left;
+}
+
+.assistant-question label {
+  color: #c9c4bb;
+}
+
+.assistant-question > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.assistant-question input {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f8f5ee;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.assistant-question input::placeholder {
+  color: #89857d;
+}
+
+.assistant-question button {
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: var(--accent);
+  cursor: pointer;
+  font-weight: 800;
 }
 
 .dialog-note {
@@ -879,13 +987,21 @@ footer {
   }
 
   .dialog-orb {
-    width: 210px;
-    height: 210px;
+    width: 150px;
+    height: 150px;
   }
 
   .dialog-orb img {
-    width: 160px;
-    height: 160px;
+    width: 116px;
+    height: 116px;
+  }
+
+  .assistant-question > div {
+    grid-template-columns: 1fr;
+  }
+
+  .assistant-question button {
+    min-height: 45px;
   }
 }
 

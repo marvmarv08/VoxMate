@@ -4,6 +4,12 @@ Purpose: Chronological record of durable project behavior, requirement, implemen
 Read when: You need recent durable changes or must record a state-changing task.
 Skip when: You only need the active task or current state.
 
+## 2026-09-24
+
+- Change: Added recurring weekly schedule records and deterministic weekday questions through both voice and manual input. JR now displays matching class cards and speaks an answer built only from saved data. Updated Marvin's Desktop `class-schedule.json` to the weekly format.
+- Evidence: `npm run typecheck`, `npm run lint`, 33 Vitest checks, production build, three newly verified acceptance criteria, SDLC validation, and Playwright desktop/mobile schedule-query smoke checks passed.
+- Remaining risk: The live microphone and installed device voices still require testing on Marvin's phone. Home-screen or closed-app activation remains a separate native-platform milestone.
+
 ## 2026-09-23
 
 - Change: Delivered the first JR MVP as a responsive React and TypeScript application with local schedule memory, JSON/CSV import, manual and in-app wake activation, spoken greeting, and Marvin's transparent circular portrait.

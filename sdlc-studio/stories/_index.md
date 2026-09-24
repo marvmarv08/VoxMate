@@ -12,8 +12,8 @@
 | Planned | 0 |
 | In Progress | 0 |
 | Review | 0 |
-| Done | 2 |
-| **Total** | **2** |
+| Done | 3 |
+| **Total** | **3** |
 
 ## Stories by Epic
 
@@ -26,6 +26,7 @@
 | --- | --- | --- | --- | --- | --- |
 | [US-01M372SJ](US-01M372SJ-store-and-import-personal-schedules.md) | Store and import personal schedules | EP-01M37226 | Done | 5 | Marvin |
 | [US-01M372P9](US-01M372P9-greet-marvin-when-jr-wakes.md) | Greet Marvin when JR wakes | EP-01M37226 | Done | 3 | Marvin |
+| [US-01M3759S](US-01M3759S-ask-jr-for-a-weekday-schedule.md) | Ask JR for a weekday schedule | EP-01M375D7 | Done | 5 | Marvin |
 
 ## Notes
 

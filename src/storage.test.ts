@@ -22,4 +22,10 @@ describe('local schedule storage', () => {
     window.localStorage.setItem('jr.schedule-memory.v1', '{broken')
     expect(loadSchedules()).toEqual([])
   })
+
+  it('loads legacy version-one records without weekly fields', () => {
+    window.localStorage.setItem('jr.schedule-memory.v1', JSON.stringify({ version: 1, items: [item] }))
+
+    expect(loadSchedules()).toEqual([item])
+  })
 })

@@ -1,4 +1,4 @@
-import type { ScheduleDraft, ScheduleItem } from './types'
+import { WEEKDAYS, type ScheduleDraft, type ScheduleItem, type Weekday } from './types'
 
 type IdFactory = () => string
 type Clock = () => Date
@@ -20,6 +20,11 @@ function isRealDate(value: string): boolean {
   return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
 }
 
+function normalizeWeekday(value: unknown): Weekday | undefined {
+  if (typeof value !== 'string') return undefined
+  return WEEKDAYS.find((weekday) => weekday.toLowerCase() === value.trim().toLowerCase())
+}
+
 function normalizeDraft(value: unknown, rowLabel = 'Schedule entry'): ScheduleDraft {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new ScheduleImportError(`${rowLabel} must be an object with title, date, and time.`)
@@ -30,14 +35,43 @@ function normalizeDraft(value: unknown, rowLabel = 'Schedule entry'): ScheduleDr
   const date = typeof record.date === 'string' ? record.date.trim() : ''
   const time = typeof record.time === 'string' ? record.time.trim() : ''
   const notes = typeof record.notes === 'string' ? record.notes.trim() : ''
+  const suppliedDay = record.dayOfWeek ?? record.dayofweek ?? record.day
+  const recurrence = record.recurrence === 'weekly' || suppliedDay ? 'weekly' : 'once'
+  const dayOfWeek = normalizeWeekday(suppliedDay)
+  const endTime = typeof record.endTime === 'string' ? record.endTime.trim() : ''
+  const teacher = typeof record.teacher === 'string' ? record.teacher.trim() : ''
+  const room = typeof record.room === 'string' ? record.room.trim() : ''
 
   if (!title) throw new ScheduleImportError(`${rowLabel} needs a title.`)
   if (title.length > 120) throw new ScheduleImportError(`${rowLabel} title must be 120 characters or fewer.`)
-  if (!isRealDate(date)) throw new ScheduleImportError(`${rowLabel} needs a valid date in YYYY-MM-DD format.`)
+  if (recurrence === 'weekly' && !dayOfWeek) {
+    throw new ScheduleImportError(`${rowLabel} needs a valid dayOfWeek such as Monday or Wednesday.`)
+  }
+  if (recurrence === 'once' && !isRealDate(date)) {
+    throw new ScheduleImportError(`${rowLabel} needs a valid date in YYYY-MM-DD format.`)
+  }
   if (!TIME_PATTERN.test(time)) throw new ScheduleImportError(`${rowLabel} needs a valid time in HH:MM format.`)
+  if (endTime && !TIME_PATTERN.test(endTime)) {
+    throw new ScheduleImportError(`${rowLabel} needs a valid endTime in HH:MM format.`)
+  }
+  if (endTime && endTime <= time) {
+    throw new ScheduleImportError(`${rowLabel} endTime must be later than its start time.`)
+  }
   if (notes.length > 500) throw new ScheduleImportError(`${rowLabel} notes must be 500 characters or fewer.`)
+  if (teacher.length > 100) throw new ScheduleImportError(`${rowLabel} teacher must be 100 characters or fewer.`)
+  if (room.length > 100) throw new ScheduleImportError(`${rowLabel} room must be 100 characters or fewer.`)
 
-  return { title, date, time, notes }
+  return {
+    title,
+    date: recurrence === 'weekly' ? '' : date,
+    time,
+    notes,
+    recurrence,
+    dayOfWeek,
+    endTime: endTime || undefined,
+    teacher: teacher || undefined,
+    room: room || undefined,
+  }
 }
 
 export function createScheduleItem(
@@ -54,10 +88,17 @@ export function createScheduleItem(
 
 export function sortSchedules(items: ScheduleItem[]): ScheduleItem[] {
   return [...items].sort((left, right) => {
-    const leftKey = `${left.date}T${left.time}`
-    const rightKey = `${right.date}T${right.time}`
+    const leftKey = scheduleSortKey(left)
+    const rightKey = scheduleSortKey(right)
     return leftKey.localeCompare(rightKey) || left.createdAt.localeCompare(right.createdAt)
   })
+}
+
+function scheduleSortKey(item: ScheduleItem): string {
+  if (item.recurrence === 'weekly' && item.dayOfWeek) {
+    return `1-${String(WEEKDAYS.indexOf(item.dayOfWeek)).padStart(2, '0')}-${item.time}`
+  }
+  return `0-${item.date}T${item.time}`
 }
 
 function parseCsvRows(input: string): string[][] {
@@ -100,10 +141,14 @@ function parseCsv(input: string): unknown[] {
   if (rows.length < 2) throw new ScheduleImportError('The CSV file needs a header and at least one schedule row.')
 
   const headers = rows[0].map((header) => header.trim().toLowerCase())
-  for (const required of ['title', 'date', 'time']) {
+  for (const required of ['title', 'time']) {
     if (!headers.includes(required)) {
       throw new ScheduleImportError(`The CSV file is missing the “${required}” column.`)
     }
+  }
+
+  if (!headers.includes('date') && !headers.includes('dayofweek') && !headers.includes('day')) {
+    throw new ScheduleImportError('The CSV file needs either a “date” or “dayOfWeek” column.')
   }
 
   return rows.slice(1).map((values) =>

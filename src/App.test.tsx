@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -56,8 +56,45 @@ async function addSchedule(title = 'Thesis consultation') {
   const user = userEvent.setup()
   await user.type(screen.getByLabelText('Schedule title'), title)
   await user.type(screen.getByLabelText('Date'), '2026-09-28')
-  await user.type(screen.getByLabelText('Time'), '13:30')
+  await user.type(screen.getByLabelText('Start time'), '13:30')
   await user.click(screen.getByRole('button', { name: 'Save to JR' }))
+  return user
+}
+
+async function importWeeklyClasses() {
+  const user = userEvent.setup()
+  const file = new File(
+    [JSON.stringify([
+      {
+        title: 'IT 313 – System Analysis and Design',
+        recurrence: 'weekly',
+        dayOfWeek: 'Wednesday',
+        time: '14:00',
+        endTime: '16:00',
+        teacher: 'Mr. Bucad',
+        room: 'CICS 301',
+      },
+      {
+        title: 'BAT 401 – Fundamentals of Business Analytics',
+        recurrence: 'weekly',
+        dayOfWeek: 'Wednesday',
+        time: '16:00',
+        endTime: '19:00',
+        teacher: 'Mr. Bucad',
+        room: 'COM LAB 4',
+      },
+      {
+        title: 'IT 312',
+        recurrence: 'weekly',
+        dayOfWeek: 'Friday',
+        time: '13:00',
+      },
+    ])],
+    'weekly-classes.json',
+    { type: 'application/json' },
+  )
+
+  await user.upload(screen.getByLabelText('Import schedule file'), file)
   return user
 }
 
@@ -140,5 +177,46 @@ describe('JR schedule MVP', () => {
 
     expect(FakeRecognition.latest?.abort).toHaveBeenCalledOnce()
     expect(screen.queryByText('Listening for “Hey JR”')).not.toBeInTheDocument()
+  })
+
+  it('shows a grounded Wednesday answer through the manual fallback', async () => {
+    render(<App />)
+    const user = await importWeeklyClasses()
+    await user.click(screen.getByRole('button', { name: 'Talk to JR' }))
+    await user.type(screen.getByLabelText('Ask JR a schedule question'), 'What is my schedule on Wednesday?')
+    await user.click(screen.getByRole('button', { name: 'Ask JR' }))
+
+    const dialog = screen.getByRole('dialog', { name: 'JR voice assistant' })
+    expect(within(dialog).getByRole('heading')).toHaveTextContent('Your Wednesday schedule')
+    expect(within(dialog).getByText('IT 313 – System Analysis and Design')).toBeInTheDocument()
+    expect(within(dialog).getByText('BAT 401 – Fundamentals of Business Analytics')).toBeInTheDocument()
+    expect(within(dialog).queryByText('IT 312')).not.toBeInTheDocument()
+  })
+
+  it('answers a combined Hey JR weekday command by voice exactly once', async () => {
+    installSpeechMocks()
+    render(<App />)
+    const user = await importWeeklyClasses()
+    await user.click(screen.getByRole('button', { name: 'Enable “Hey JR”' }))
+
+    FakeRecognition.latest?.onresult?.({
+      results: [{ 0: { transcript: 'Hey JR, what is my schedule on Wednesday?' } }],
+    })
+
+    const dialog = await screen.findByRole('dialog', { name: 'JR voice assistant' })
+    expect(within(dialog).getByRole('heading')).toHaveTextContent('Your Wednesday schedule')
+    expect(window.speechSynthesis.speak).toHaveBeenCalledOnce()
+    const spoken = vi.mocked(window.speechSynthesis.speak).mock.calls[0]?.[0]
+    expect(spoken?.text).toContain('On Wednesday, you have 2 schedules')
+  })
+
+  it('shows an honest empty answer when no schedule matches', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Talk to JR' }))
+    await user.type(screen.getByLabelText('Ask JR a schedule question'), 'Show my Sunday schedule')
+    await user.click(screen.getByRole('button', { name: 'Ask JR' }))
+
+    expect(screen.getByRole('heading', { name: 'You have no schedules saved for Sunday.' })).toBeInTheDocument()
   })
 })

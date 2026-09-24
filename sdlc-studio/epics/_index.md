@@ -11,14 +11,15 @@
 | Ready | 0 |
 | Approved | 0 |
 | In Progress | 0 |
-| Done | 1 |
-| **Total** | **1** |
+| Done | 2 |
+| **Total** | **2** |
 
 ## Epics
 
 | ID | Title | Status | Stories | Deps | Created | Updated |
 | --- | --- | --- | --- | --- | --- | --- |
 | [EP-01M37226](EP-01M37226-jr-schedule-memory-mvp.md) | JR Schedule Memory MVP | Done | 0 | -- | 2026-09-23 | 2026-09-23 |
+| [EP-01M375D7](EP-01M375D7-jr-weekly-schedule-answers.md) | JR Weekly Schedule Answers | Done | 0 | -- | 2026-09-23 | 2026-09-23 |
 
 ## Notes
 

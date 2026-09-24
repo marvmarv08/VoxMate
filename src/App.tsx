@@ -1,12 +1,26 @@
-import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { createScheduleItem, parseScheduleFile, ScheduleImportError, sortSchedules } from './schedule'
+import {
+  buildScheduleAnswer,
+  findSchedulesForWeekday,
+  formatScheduleTime,
+  parseWeekdayScheduleQuery,
+} from './scheduleQuery'
 import { loadSchedules, saveSchedules } from './storage'
-import type { ScheduleDraft, ScheduleItem } from './types'
+import { WEEKDAYS, type ScheduleDraft, type ScheduleItem } from './types'
 import { useVoiceAssistant } from './useVoiceAssistant'
-import { GREETING } from './voice'
 
-const emptyDraft: ScheduleDraft = { title: '', date: '', time: '', notes: '' }
+const emptyDraft: ScheduleDraft = {
+  title: '',
+  date: '',
+  time: '',
+  notes: '',
+  recurrence: 'once',
+  endTime: '',
+  teacher: '',
+  room: '',
+}
 
 function formatScheduleDate(date: string): string {
   return new Intl.DateTimeFormat('en-US', {
@@ -16,14 +30,6 @@ function formatScheduleDate(date: string): string {
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(`${date}T00:00:00Z`))
-}
-
-function formatScheduleTime(time: string): string {
-  const [hours, minutes] = time.split(':').map(Number)
-  return new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(2026, 0, 1, hours, minutes))
 }
 
 function MicrophoneIcon() {
@@ -40,8 +46,23 @@ function App() {
   const [draft, setDraft] = useState<ScheduleDraft>(emptyDraft)
   const [feedback, setFeedback] = useState('')
   const [formError, setFormError] = useState('')
+  const [question, setQuestion] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const voice = useVoiceAssistant()
+  const resolveScheduleQuestion = useCallback((transcript: string) => {
+    const weekday = parseWeekdayScheduleQuery(transcript)
+    if (!weekday) return null
+    return buildScheduleAnswer(weekday, findSchedulesForWeekday(schedules, weekday))
+  }, [schedules])
+  const voice = useVoiceAssistant(resolveScheduleQuestion)
+
+  const answerWeekday = useMemo(
+    () => parseWeekdayScheduleQuery(voice.lastTranscript),
+    [voice.lastTranscript],
+  )
+  const answerSchedules = useMemo(
+    () => answerWeekday ? findSchedulesForWeekday(schedules, answerWeekday) : [],
+    [answerWeekday, schedules],
+  )
 
   useEffect(() => {
     saveSchedules(schedules)
@@ -55,6 +76,15 @@ function App() {
 
   function updateDraft(field: keyof ScheduleDraft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }))
+  }
+
+  function changeRecurrence(recurrence: 'once' | 'weekly') {
+    setDraft((current) => ({
+      ...current,
+      recurrence,
+      date: recurrence === 'once' ? current.date : '',
+      dayOfWeek: recurrence === 'weekly' ? current.dayOfWeek ?? 'Monday' : undefined,
+    }))
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -98,6 +128,14 @@ function App() {
     setFeedback('The schedule was removed from JR’s memory.')
   }
 
+  function handleQuestion(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const transcript = question.trim()
+    if (!transcript) return
+    voice.answerQuestion(transcript)
+    setQuestion('')
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -137,7 +175,7 @@ function App() {
               </span>
               <h2>Say “Hey JR”</h2>
               <p>
-                Enable wake listening while this app is open, or open JR manually anytime.
+                Try “Hey JR, what is my schedule on Wednesday?” while this app is open.
               </p>
               <div className="voice-actions">
                 <button className="primary-button" type="button" onClick={voice.greet}>
@@ -186,18 +224,41 @@ function App() {
                     required
                   />
                 </label>
+                <label>
+                  Schedule type
+                  <select
+                    value={draft.recurrence ?? 'once'}
+                    onChange={(event) => changeRecurrence(event.target.value as 'once' | 'weekly')}
+                  >
+                    <option value="once">One-time event</option>
+                    <option value="weekly">Repeats weekly</option>
+                  </select>
+                </label>
                 <div className="field-row">
+                  {draft.recurrence === 'weekly' ? (
+                    <label>
+                      Weekday
+                      <select
+                        value={draft.dayOfWeek ?? 'Monday'}
+                        onChange={(event) => updateDraft('dayOfWeek', event.target.value)}
+                        required
+                      >
+                        {WEEKDAYS.map((weekday) => <option key={weekday}>{weekday}</option>)}
+                      </select>
+                    </label>
+                  ) : (
+                    <label>
+                      Date
+                      <input
+                        type="date"
+                        value={draft.date}
+                        onChange={(event) => updateDraft('date', event.target.value)}
+                        required
+                      />
+                    </label>
+                  )}
                   <label>
-                    Date
-                    <input
-                      type="date"
-                      value={draft.date}
-                      onChange={(event) => updateDraft('date', event.target.value)}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Time
+                    Start time
                     <input
                       type="time"
                       value={draft.time}
@@ -206,6 +267,34 @@ function App() {
                     />
                   </label>
                 </div>
+                <div className="field-row">
+                  <label>
+                    End time <span>Optional</span>
+                    <input
+                      type="time"
+                      value={draft.endTime ?? ''}
+                      onChange={(event) => updateDraft('endTime', event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    Room <span>Optional</span>
+                    <input
+                      value={draft.room ?? ''}
+                      onChange={(event) => updateDraft('room', event.target.value)}
+                      placeholder="e.g. CICS 301"
+                      maxLength={100}
+                    />
+                  </label>
+                </div>
+                <label>
+                  Teacher <span>Optional</span>
+                  <input
+                    value={draft.teacher ?? ''}
+                    onChange={(event) => updateDraft('teacher', event.target.value)}
+                    placeholder="e.g. Mr. Bucad"
+                    maxLength={100}
+                  />
+                </label>
                 <label>
                   Notes <span>Optional</span>
                   <textarea
@@ -234,7 +323,7 @@ function App() {
               <label className="upload-button" htmlFor="schedule-file">
                 <span aria-hidden="true">↑</span> Upload JSON or CSV
               </label>
-              <p className="file-help">Columns: title, date, time, and optional notes.</p>
+              <p className="file-help">Use date for one-time events or dayOfWeek for weekly schedules.</p>
 
               {formError && <p className="form-message error-message" role="alert">{formError}</p>}
               {feedback && <p className="form-message success-message" role="status">{feedback}</p>}
@@ -257,27 +346,40 @@ function App() {
                 </div>
               ) : (
                 <ol className="schedule-list">
-                  {schedules.map((schedule) => (
-                    <li key={schedule.id}>
-                      <div className="date-tile">
-                        <strong>{new Date(`${schedule.date}T00:00:00Z`).getUTCDate()}</strong>
-                        <span>{new Date(`${schedule.date}T00:00:00Z`).toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })}</span>
-                      </div>
-                      <div className="schedule-details">
-                        <span className="schedule-meta">{formatScheduleDate(schedule.date)} · {formatScheduleTime(schedule.time)}</span>
-                        <h4>{schedule.title}</h4>
-                        {schedule.notes && <p>{schedule.notes}</p>}
-                      </div>
-                      <button
-                        className="delete-button"
-                        type="button"
-                        onClick={() => deleteSchedule(schedule.id)}
-                        aria-label={`Delete ${schedule.title}`}
-                      >
-                        ×
-                      </button>
-                    </li>
-                  ))}
+                  {schedules.map((schedule) => {
+                    const isWeekly = schedule.recurrence === 'weekly' && schedule.dayOfWeek
+                    const scheduleDate = isWeekly ? null : new Date(`${schedule.date}T00:00:00Z`)
+                    const timeLabel = schedule.endTime
+                      ? `${formatScheduleTime(schedule.time)}–${formatScheduleTime(schedule.endTime)}`
+                      : formatScheduleTime(schedule.time)
+
+                    return (
+                      <li key={schedule.id}>
+                        <div className={`date-tile ${isWeekly ? 'weekly-tile' : ''}`}>
+                          <strong>{isWeekly ? schedule.dayOfWeek?.slice(0, 3) : scheduleDate?.getUTCDate()}</strong>
+                          <span>{isWeekly ? 'weekly' : scheduleDate?.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })}</span>
+                        </div>
+                        <div className="schedule-details">
+                          <span className="schedule-meta">
+                            {isWeekly ? `Every ${schedule.dayOfWeek}` : formatScheduleDate(schedule.date)} · {timeLabel}
+                          </span>
+                          <h4>{schedule.title}</h4>
+                          {(schedule.room || schedule.teacher) && (
+                            <p>{[schedule.room, schedule.teacher].filter(Boolean).join(' · ')}</p>
+                          )}
+                          {schedule.notes && <p>{schedule.notes}</p>}
+                        </div>
+                        <button
+                          className="delete-button"
+                          type="button"
+                          onClick={() => deleteSchedule(schedule.id)}
+                          aria-label={`Delete ${schedule.title}`}
+                        >
+                          ×
+                        </button>
+                      </li>
+                    )
+                  })}
                 </ol>
               )}
             </article>
@@ -293,7 +395,7 @@ function App() {
       {voice.assistantOpen && (
         <div className="assistant-backdrop" role="presentation" onMouseDown={voice.closeAssistant}>
           <section
-            className="assistant-dialog"
+            className={`assistant-dialog ${answerWeekday ? 'has-schedule-answer' : ''}`}
             role="dialog"
             aria-modal="true"
             aria-label="JR voice assistant"
@@ -307,9 +409,45 @@ function App() {
               <span />
               <img src="/jr-avatar.png" alt="JR" />
             </div>
-            <p className="dialog-status">JR IS SPEAKING</p>
-            <h2>{GREETING}</h2>
-            <p className="dialog-note">Voice questions and schedule answers are coming in the next memory milestone.</p>
+            <p className="dialog-status">
+              {answerWeekday && answerSchedules.length > 0 ? 'JR FOUND YOUR SCHEDULE' : 'JR IS SPEAKING'}
+            </p>
+            <h2>
+              {answerWeekday && answerSchedules.length > 0
+                ? `Your ${answerWeekday} schedule`
+                : voice.assistantMessage}
+            </h2>
+            {answerWeekday && answerSchedules.length > 0 && (
+              <p className="dialog-summary">
+                {answerSchedules.length} {answerSchedules.length === 1 ? 'class' : 'classes'} saved
+              </p>
+            )}
+            {answerWeekday && answerSchedules.length > 0 && (
+              <ol className="assistant-results" aria-label={`${answerWeekday} schedules`}>
+                {answerSchedules.map((schedule) => (
+                  <li key={schedule.id}>
+                    <time>{formatScheduleTime(schedule.time)}</time>
+                    <span>
+                      <strong>{schedule.title}</strong>
+                      <small>{[schedule.room, schedule.teacher].filter(Boolean).join(' · ')}</small>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <form className="assistant-question" onSubmit={handleQuestion}>
+              <label htmlFor="jr-question">Ask JR a schedule question</label>
+              <div>
+                <input
+                  id="jr-question"
+                  value={question}
+                  onChange={(event) => setQuestion(event.target.value)}
+                  placeholder="What is my schedule on Wednesday?"
+                />
+                <button type="submit">Ask JR</button>
+              </div>
+            </form>
+            <p className="dialog-note">JR answers only from the schedules saved on this device.</p>
           </section>
         </div>
       )}

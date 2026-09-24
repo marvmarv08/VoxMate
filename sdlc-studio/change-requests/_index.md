@@ -10,10 +10,11 @@
 | Proposed | 0 |
 | Approved | 0 |
 | In Progress | 0 |
-| Complete | 0 |
+| Complete | 1 |
 | Rejected | 0 |
 | Deferred | 0 |
-| **Total** | **0** |
+| inbox | 0 |
+| **Total** | **1** |
 
 ## By Priority
 
@@ -24,6 +25,7 @@
 
 | ID | Title | Priority | Status | Type | Linked Epics | Date |
 | --- | --- | --- | --- | --- | --- | --- |
+| [CR-01M37591](CR-01M37591-add-recurring-schedule-voice-lookup.md) | Add recurring schedule voice lookup | P2 | Complete | feature-request | -- | 2026-09-23 |
 
 ## Dependencies
 

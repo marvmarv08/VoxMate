@@ -15,6 +15,7 @@ The MVP is a local-first React and TypeScript single-page application built with
 | --- | --- |
 | App shell | Navigation, dashboard, forms, schedule list, and assistant popup |
 | Schedule module | Validation, sorting, and import parsing |
+| Schedule query module | Weekday intent parsing, matching, and grounded response construction |
 | Storage module | Versioned browser-local persistence |
 | Voice adapter | Browser speech recognition and text-to-speech |
 | Static assets | Approved JR portrait and application metadata |
@@ -26,6 +27,7 @@ The MVP is a local-first React and TypeScript single-page application built with
 3. Treat browser speech recognition as an optional enhancement because support varies.
 4. Require explicit user action before listening begins.
 5. Keep platform-specific wake integrations outside the shared core.
+6. Construct every schedule answer from pure query functions over stored records; do not use generative text for factual results.
 
 ## Security and Privacy
 
