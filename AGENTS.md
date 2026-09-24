@@ -18,8 +18,8 @@ Skip when: Never skip during project work.
 - Name: JR Voice Assistant
 - One-sentence positioning: A cross-platform personal voice assistant that remembers user-provided information and responds through natural voice interaction.
 - Project type: Local-first React and TypeScript web application, designed for later desktop and mobile packaging.
-- Current phase: Verified in-app schedule assistant MVP.
-- Current top objective: Prepare installable mobile delivery and platform-specific home-screen integrations without weakening local-first privacy.
+- Current phase: Deployed installable iOS PWA with verified IndexedDB schedule memory.
+- Current top objective: Validate voice behavior on Marvin's physical iPhone, then plan platform-specific integrations without weakening local-first privacy.
 
 ## Runtime Profile
 

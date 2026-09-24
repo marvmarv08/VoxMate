@@ -10,10 +10,10 @@
 | Proposed | 0 |
 | Approved | 0 |
 | In Progress | 0 |
-| Complete | 1 |
+| Complete | 2 |
 | Rejected | 0 |
 | Deferred | 0 |
-| inbox | 1 |
+| inbox | 0 |
 | **Total** | **2** |
 
 ## By Priority
@@ -26,7 +26,7 @@
 | ID | Title | Priority | Status | Type | Linked Epics | Date |
 | --- | --- | --- | --- | --- | --- | --- |
 | [CR-01M37591](CR-01M37591-add-recurring-schedule-voice-lookup.md) | Add recurring schedule voice lookup | P2 | Complete | feature-request | -- | 2026-09-23 |
-| [CR-01M38C9Q](CR-01M38C9Q-ship-installable-ios-pwa-with-local-indexeddb-memory.md) | Ship installable iOS PWA with local IndexedDB memory | P2 | inbox | feature-request | -- | 2026-09-24 |
+| [CR-01M38C9Q](CR-01M38C9Q-ship-installable-ios-pwa-with-local-indexeddb-memory.md) | Ship installable iOS PWA with local IndexedDB memory | P2 | Complete | feature-request | -- | 2026-09-24 |
 
 ## Dependencies
 

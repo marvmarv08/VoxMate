@@ -1,6 +1,7 @@
 # CR-01M38C9Q: Ship installable iOS PWA with local IndexedDB memory
 
-> **Status:** inbox
+> **Status:** Complete
+> **Triaged-by:** QA Reviewer; persona; v1
 > **Created:** 2026-09-24
 > **Created-by:** sdlc-studio new
 > **Raised-by:** sdlc-studio; agent; v1
@@ -19,9 +20,9 @@ Marvin can install and test JR on iPhone over HTTPS while schedules remain on-de
 
 ## Acceptance Criteria
 
-- [ ] The JR web app is installable from Safari using Add to Home Screen and opens in standalone display mode.
-- [ ] Schedules persist in IndexedDB and existing localStorage schedule data migrates without loss.
-- [ ] The deployed HTTPS app supports explicit microphone permission and clearly states that wake listening works only while JR is open.
+- [x] The JR web app is installable from Safari using Add to Home Screen and opens in standalone display mode.
+- [x] Schedules persist in IndexedDB and existing localStorage schedule data migrates without loss.
+- [x] The deployed HTTPS app supports explicit microphone permission and clearly states that wake listening works only while JR is open.
 
 ## Revision History
 
