@@ -4,6 +4,7 @@ import { mkdir } from 'node:fs/promises'
 import { chromium } from 'playwright'
 
 const baseUrl = process.env.JR_BASE_URL ?? 'http://127.0.0.1:5173'
+const expectPwa = process.env.JR_EXPECT_PWA === '1'
 const artifactDirectory = new URL('../artifacts/qa/', import.meta.url)
 
 await mkdir(artifactDirectory, { recursive: true })
@@ -23,6 +24,18 @@ try {
   await page.evaluate(() => localStorage.clear())
   await page.reload({ waitUntil: 'networkidle' })
 
+  if (expectPwa) {
+    const manifest = await page.evaluate(async () => {
+      const link = document.querySelector('link[rel="manifest"]')
+      if (!(link instanceof HTMLLinkElement)) return null
+      const response = await fetch(link.href)
+      return response.json()
+    })
+    assert.equal(manifest?.short_name, 'JR', 'PWA manifest should identify JR')
+    assert.equal(manifest?.display, 'standalone', 'PWA should open without Safari chrome')
+    await page.evaluate(() => navigator.serviceWorker.ready)
+  }
+
   await assertVisible(page.getByRole('heading', { name: /Meet JR/i }))
   const avatarLoaded = await page.locator('img[alt="JR assistant"]').evaluate(
     (image) => image.complete && image.naturalWidth > 0,
@@ -38,6 +51,21 @@ try {
 
   await page.reload({ waitUntil: 'networkidle' })
   await assertVisible(page.getByText('Thesis consultation'))
+  const indexedDbTitles = await page.evaluate(async () => {
+    const database = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('jr-voice-assistant', 1)
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const payload = await new Promise((resolve, reject) => {
+      const request = database.transaction('memory', 'readonly').objectStore('memory').get('jr.schedule-memory.v1')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    database.close()
+    return payload.items.map((item) => item.title)
+  })
+  assert.ok(indexedDbTitles.includes('Thesis consultation'), 'schedule should persist in IndexedDB')
 
   await page.getByLabel('Import schedule file').setInputFiles({
     name: 'schedule.json',
@@ -115,9 +143,20 @@ try {
   assert.equal(mobileDialogOverflow, false, 'mobile assistant dialog should not overflow horizontally')
   await page.screenshot({ path: new URL('mobile-query.png', artifactDirectory).pathname })
 
+  await page.getByRole('button', { name: 'Close JR' }).click()
+  await assertVisible(page.getByRole('heading', { name: 'Keep JR on your Home Screen' }))
+
+  if (expectPwa) {
+    await context.setOffline(true)
+    await page.reload({ waitUntil: 'domcontentloaded' })
+    await assertVisible(page.getByRole('heading', { name: /Meet JR/i }))
+    await context.setOffline(false)
+  }
+
   assert.deepEqual(browserErrors, [], `browser emitted errors:\n${browserErrors.join('\n')}`)
-  console.log('Browser smoke passed: weekly query, persistence, imports, deletion, and mobile layout.')
+  console.log('Browser smoke passed: IndexedDB, weekly query, imports, deletion, mobile layout, and PWA checks.')
 } finally {
+  await context.setOffline(false).catch(() => {})
   await browser.close()
 }
 

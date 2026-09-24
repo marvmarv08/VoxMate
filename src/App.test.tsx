@@ -107,7 +107,7 @@ describe('JR schedule MVP', () => {
 
     firstRender.unmount()
     render(<App />)
-    expect(screen.getByText('Thesis consultation')).toBeInTheDocument()
+    expect(await screen.findByText('Thesis consultation')).toBeInTheDocument()
   })
 
   it('imports JSON schedules and reports the number remembered', async () => {

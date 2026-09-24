@@ -1,0 +1,19 @@
+{
+  "name": "JR Voice Assistant",
+  "short_name": "JR",
+  "description": "A private, local-first voice assistant for Marvin's schedules.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f0e8",
+  "theme_color": "#f4f0e8",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/jr-avatar.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -7,7 +7,10 @@ JR is a cross-platform personal voice-assistant project that remembers informati
 - Add, view, and delete personal schedules.
 - Save recurring weekly classes with start/end time, teacher, and room.
 - Import schedules from JSON or CSV files.
-- Keep schedule data locally in the current browser using `localStorage`.
+- Keep schedule data locally in the current browser using IndexedDB.
+- Automatically migrate valid schedules saved by the earlier `localStorage` version.
+- Install JR from Safari as an iPhone Home Screen web app.
+- Reopen the cached app shell when the device is temporarily offline.
 - Open JR manually and hear: “Hello, Marvin. How can I help you?”
 - Opt in to “Hey JR” wake listening while the app is open, when the browser supports speech recognition.
 - Ask “What is my schedule on Wednesday?” and receive a spoken answer plus matching schedule cards.
@@ -26,6 +29,17 @@ npm run dev
 ```
 
 Open the local address shown in the terminal, normally `http://localhost:5173`.
+
+## Install on iPhone
+
+The deployed site must use HTTPS before microphone and installable-app features can be tested reliably.
+
+1. Open the deployed JR link in Safari.
+2. Tap **Share**.
+3. Tap **Add to Home Screen**.
+4. Turn on **Open as Web App**, then tap **Add**.
+
+The Home Screen icon opens JR in standalone mode. Schedules saved on the iPhone remain on that iPhone; they do not automatically sync with the computer.
 
 ## Schedule import formats
 
@@ -78,8 +92,8 @@ npm run build
 
 ## Current limitation
 
-This is an in-app web MVP, not yet an operating-system assistant. It cannot listen after the app or browser is closed, and speech recognition support differs by browser. A future desktop/mobile layer can reuse the shared memory and assistant logic while adding native background wake-word capabilities where each operating system permits them.
+This is an in-app web MVP, not yet an operating-system assistant. It cannot listen after the app is closed or from the iPhone Home Screen, and speech recognition support differs by browser and iOS version. The typed schedule question remains available when wake listening is unsupported. A future native iOS layer can reuse the shared memory and assistant logic while adding Siri/App Intent integration permitted by iOS.
 
 ## Privacy direction
 
-Schedule data stays in this browser in the MVP. Microphone listening is off by default and must be enabled explicitly. The project does not yet send schedules or microphone audio to a custom backend.
+Schedule data stays in IndexedDB in this browser, with a same-device `localStorage` fallback for resilience. Microphone listening is off by default and must be enabled explicitly. The project does not send schedules or microphone audio to a custom backend.

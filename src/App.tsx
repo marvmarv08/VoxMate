@@ -42,7 +42,8 @@ function MicrophoneIcon() {
 }
 
 function App() {
-  const [schedules, setSchedules] = useState<ScheduleItem[]>(() => sortSchedules(loadSchedules()))
+  const [schedules, setSchedules] = useState<ScheduleItem[]>([])
+  const [storageReady, setStorageReady] = useState(false)
   const [draft, setDraft] = useState<ScheduleDraft>(emptyDraft)
   const [feedback, setFeedback] = useState('')
   const [formError, setFormError] = useState('')
@@ -65,14 +66,30 @@ function App() {
   )
 
   useEffect(() => {
-    saveSchedules(schedules)
-  }, [schedules])
+    let active = true
+
+    loadSchedules().then((storedSchedules) => {
+      if (!active) return
+      setSchedules(sortSchedules(storedSchedules))
+      setStorageReady(true)
+    })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!storageReady) return
+    void saveSchedules(schedules)
+  }, [schedules, storageReady])
 
   const upcomingLabel = useMemo(() => {
+    if (!storageReady) return 'Loading local memory…'
     if (schedules.length === 0) return 'Nothing stored yet'
     if (schedules.length === 1) return '1 schedule remembered'
     return `${schedules.length} schedules remembered`
-  }, [schedules.length])
+  }, [schedules.length, storageReady])
 
   function updateDraft(field: keyof ScheduleDraft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }))
@@ -334,7 +351,7 @@ function App() {
               <div className="schedule-header">
                 <div>
                   <h3>What JR remembers</h3>
-                  <p>Saved only in this browser for now.</p>
+                  <p>Saved in private IndexedDB storage on this device.</p>
                 </div>
               </div>
 
@@ -387,9 +404,25 @@ function App() {
         </section>
       </main>
 
+      <aside className="install-card" aria-labelledby="install-title">
+        <div>
+          <span className="eyebrow">INSTALL ON IPHONE</span>
+          <h2 id="install-title">Keep JR on your Home Screen</h2>
+          <p>Open this site in Safari, tap Share, choose “Add to Home Screen,” then turn on “Open as Web App.”</p>
+        </div>
+        <div className="install-steps" aria-label="iPhone installation steps">
+          <span><b>1</b> Safari</span>
+          <span><b>2</b> Share</span>
+          <span><b>3</b> Add to Home Screen</span>
+        </div>
+        <p className="install-note">
+          Your schedules use private IndexedDB storage on this device. “Hey JR” can only listen while JR is open.
+        </p>
+      </aside>
+
       <footer>
-        <span>JR Voice Assistant · MVP 0.1</span>
-        <span>Your schedule stays on this device.</span>
+        <span>JR Voice Assistant · MVP 0.2</span>
+        <span>Your schedule stays in local IndexedDB on this device.</span>
       </footer>
 
       {voice.assistantOpen && (

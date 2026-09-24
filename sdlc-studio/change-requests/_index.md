@@ -1,6 +1,6 @@
 # Change Request Registry
 
-**Last Updated:** 2026-09-23
+**Last Updated:** 2026-09-24
 **PRD Reference:** [Product Requirements Document](../prd.md)
 
 ## Summary
@@ -13,8 +13,8 @@
 | Complete | 1 |
 | Rejected | 0 |
 | Deferred | 0 |
-| inbox | 0 |
-| **Total** | **1** |
+| inbox | 1 |
+| **Total** | **2** |
 
 ## By Priority
 
@@ -26,6 +26,7 @@
 | ID | Title | Priority | Status | Type | Linked Epics | Date |
 | --- | --- | --- | --- | --- | --- | --- |
 | [CR-01M37591](CR-01M37591-add-recurring-schedule-voice-lookup.md) | Add recurring schedule voice lookup | P2 | Complete | feature-request | -- | 2026-09-23 |
+| [CR-01M38C9Q](CR-01M38C9Q-ship-installable-ios-pwa-with-local-indexeddb-memory.md) | Ship installable iOS PWA with local IndexedDB memory | P2 | inbox | feature-request | -- | 2026-09-24 |
 
 ## Dependencies
 
