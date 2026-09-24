@@ -14,3 +14,16 @@ Purpose: Append-only compact summaries of closed tasks.
 - Delivery State: not-requested
 - Verification Evidence: HEAD d4f7953: typecheck, ESLint, 20 Vitest checks, Vite production build, six SDLC acceptance criteria, SDLC validation, and Playwright desktop/mobile smoke checks passed; screenshots visually inspected.
 - Closed At: 2026-09-23T12:49:25Z
+
+## 2026-09-24 weekly-schedule-query
+
+<!-- pmm-task-id: weekly-schedule-query -->
+
+- Status: done
+- Parent Task: none
+- Title: Add recurring schedules and spoken weekday lookup
+- Execution State: done
+- Verification State: passed
+- Delivery State: not-requested
+- Verification Evidence: HEAD 37bb09c: typecheck, ESLint, 33 Vitest checks, Vite production build, three SDLC acceptance criteria, SDLC validation, and Playwright desktop/mobile weekly-query smoke checks passed; desktop and mobile screenshots visually inspected.
+- Closed At: 2026-09-24T00:18:50Z
