@@ -6,6 +6,10 @@ Skip when: You only need the active task or current state.
 
 ## 2026-09-24
 
+- Change: Updated JR 0.2.1 to prefer male English system voices on iOS and other browsers, with a slightly slower rate and deeper pitch when only a generic English voice is available.
+- Evidence: Male-voice selection and fallback unit tests, type checking, lint, all 36 Vitest checks, and the production build passed.
+- Remaining risk: Exact voice names and sound vary by the voices installed on each device; Marvin must confirm the result on the physical iPhone.
+
 - Change: Released JR 0.2.0 as an installable HTTPS PWA at `https://voice-assistant-ten-xi.vercel.app`. Schedule memory now uses IndexedDB, migrates valid legacy localStorage data, retains a same-device fallback, and includes an offline app shell plus iPhone installation guidance.
 - Evidence: Type checking, lint, 34 Vitest checks, production build, SDLC validation, local production PWA smoke, and live HTTPS smoke all passed. Browser checks covered IndexedDB persistence, migration-facing flows, schedule queries, manifest, service worker, offline reload, and a 390px mobile viewport.
 - Remaining risk: Voice recognition still depends on Safari/iOS support and must be tested on Marvin's physical iPhone. The PWA cannot listen while closed or appear over the Home Screen like Siri.

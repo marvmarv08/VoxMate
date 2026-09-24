@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jr-app-shell-v1'
+const CACHE_NAME = 'jr-app-shell-v2'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/jr-avatar.png']
 
 self.addEventListener('install', (event) => {

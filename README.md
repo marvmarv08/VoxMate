@@ -12,6 +12,7 @@ JR is a cross-platform personal voice-assistant project that remembers informati
 - Install JR from Safari as an iPhone Home Screen web app.
 - Reopen the cached app shell when the device is temporarily offline.
 - Open JR manually and hear: “Hello, Marvin. How can I help you?”
+- Prefer an available male English system voice and use a slightly deeper pitch as fallback.
 - Opt in to “Hey JR” wake listening while the app is open, when the browser supports speech recognition.
 - Ask “What is my schedule on Wednesday?” and receive a spoken answer plus matching schedule cards.
 - Type the same question manually when speech recognition is unavailable.

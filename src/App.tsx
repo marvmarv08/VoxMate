@@ -192,7 +192,8 @@ function App() {
               </span>
               <h2>Say “Hey JR”</h2>
               <p>
-                Try “Hey JR, what is my schedule on Wednesday?” while this app is open.
+                Try “Hey JR, what is my schedule on Wednesday?” while this app is open. JR prefers a
+                deeper male voice available on your device.
               </p>
               <div className="voice-actions">
                 <button className="primary-button" type="button" onClick={voice.greet}>
@@ -421,7 +422,7 @@ function App() {
       </aside>
 
       <footer>
-        <span>JR Voice Assistant · MVP 0.2</span>
+        <span>JR Voice Assistant · MVP 0.2.1</span>
         <span>Your schedule stays in local IndexedDB on this device.</span>
       </footer>
 

@@ -34,6 +34,7 @@ Validate the deployed app on Marvin's physical iPhone, then design platform-spec
 - Schedules can be added, imported from JSON/CSV, viewed chronologically, persisted, and deleted.
 - Invalid imports fail atomically without changing existing schedule memory.
 - JR opens manually and speaks “Hello, Marvin. How can I help you?” through browser text-to-speech.
+- JR prefers an available male English system voice and uses a slightly deeper pitch as a fallback.
 - Supported browsers can opt in to in-app “Hey JR” recognition with visible listening and stop controls.
 - Unsupported recognition falls back cleanly to manual activation.
 - Weekly schedules can store weekday, start/end time, teacher, room, and notes alongside existing dated schedules.
@@ -41,7 +42,7 @@ Validate the deployed app on Marvin's physical iPhone, then design platform-spec
 - Manual text questions provide the same result when speech recognition is unavailable.
 - Schedule memory uses IndexedDB with automatic migration and a same-device localStorage fallback.
 - The installed app opens in standalone mode and its cached shell can reopen offline.
-- Type checking, lint, 34 automated tests, production build, SDLC validation, and local plus deployed PWA browser smoke checks pass.
+- Type checking, lint, 36 automated tests, production build, SDLC validation, and local plus deployed PWA browser smoke checks pass.
 
 ## Known Issues
 
