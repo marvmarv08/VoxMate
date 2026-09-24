@@ -111,12 +111,18 @@ try {
   await assertVisible(page.getByText('Every Wednesday').first())
 
   await page.getByRole('button', { name: 'Talk to JR' }).click()
-  await assertVisible(page.getByRole('dialog', { name: 'JR voice assistant' }))
-  await page.getByLabel('Ask JR a schedule question').fill('What is my schedule on Wednesday?')
+  const voiceDialog = page.getByRole('dialog', { name: 'JR voice assistant' })
+  await assertVisible(voiceDialog)
+  const dialogBox = await voiceDialog.boundingBox()
+  assert.ok(dialogBox.width < 1440 && dialogBox.height < 900, 'voice view should be a pop-up, not full screen')
+  assert.equal(await voiceDialog.getByRole('textbox').count(), 0, 'voice view should not show an input')
+  await page.waitForTimeout(350)
+  await page.screenshot({ path: new URL('desktop-popup.png', artifactDirectory).pathname })
+  await page.getByRole('button', { name: 'Close JR' }).click()
+
+  await page.getByLabel('Ask JR about your schedule').fill('What is my schedule on Wednesday?')
   await page.getByRole('button', { name: 'Ask JR' }).click()
-  await assertVisible(page.getByRole('heading', { name: 'Your Wednesday schedule' }))
-  await assertVisible(page.getByRole('list', { name: 'Wednesday schedules' }))
-  await page.screenshot({ path: new URL('desktop-popup.png', artifactDirectory).pathname, fullPage: true })
+  await assertVisible(page.getByRole('heading', { name: /On Wednesday, you have 2 schedules/i }))
   await page.getByRole('button', { name: 'Close JR' }).click()
 
   await page.getByRole('button', { name: 'Delete Defense practice' }).click()
@@ -134,9 +140,15 @@ try {
   await page.screenshot({ path: new URL('mobile.png', artifactDirectory).pathname, fullPage: true })
 
   await page.getByRole('button', { name: 'Talk to JR' }).click()
-  await page.getByLabel('Ask JR a schedule question').fill('Show my Wednesday classes')
+  await assertVisible(page.getByRole('heading', { name: 'Hello, Marvin. How can I help you?' }))
+  await assertVisible(page.getByRole('button', { name: 'Close JR' }))
+  await page.waitForTimeout(350)
+  await page.screenshot({ path: new URL('mobile-popup.png', artifactDirectory).pathname })
+  await page.getByRole('button', { name: 'Close JR' }).click()
+
+  await page.getByLabel('Ask JR about your schedule').fill('Show my Wednesday classes')
   await page.getByRole('button', { name: 'Ask JR' }).click()
-  await assertVisible(page.getByRole('heading', { name: 'Your Wednesday schedule' }))
+  await assertVisible(page.getByRole('heading', { name: /On Wednesday, you have 2 schedules/i }))
   const mobileDialogOverflow = await page.getByRole('dialog').evaluate(
     (dialog) => dialog.scrollWidth > dialog.clientWidth,
   )

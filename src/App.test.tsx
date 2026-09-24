@@ -182,15 +182,16 @@ describe('JR schedule MVP', () => {
   it('shows a grounded Wednesday answer through the manual fallback', async () => {
     render(<App />)
     const user = await importWeeklyClasses()
-    await user.click(screen.getByRole('button', { name: 'Talk to JR' }))
-    await user.type(screen.getByLabelText('Ask JR a schedule question'), 'What is my schedule on Wednesday?')
+    await user.type(screen.getByLabelText('Ask JR about your schedule'), 'What is my schedule on Wednesday?')
     await user.click(screen.getByRole('button', { name: 'Ask JR' }))
 
     const dialog = screen.getByRole('dialog', { name: 'JR voice assistant' })
-    expect(within(dialog).getByRole('heading')).toHaveTextContent('Your Wednesday schedule')
-    expect(within(dialog).getByText('IT 313 – System Analysis and Design')).toBeInTheDocument()
-    expect(within(dialog).getByText('BAT 401 – Fundamentals of Business Analytics')).toBeInTheDocument()
-    expect(within(dialog).queryByText('IT 312')).not.toBeInTheDocument()
+    const answer = within(dialog).getByRole('heading')
+    expect(answer).toHaveTextContent('On Wednesday, you have 2 schedules')
+    expect(answer).toHaveTextContent('IT 313 – System Analysis and Design')
+    expect(answer).toHaveTextContent('BAT 401 – Fundamentals of Business Analytics')
+    expect(within(dialog).queryByRole('textbox')).not.toBeInTheDocument()
+    expect(within(dialog).queryByRole('list')).not.toBeInTheDocument()
   })
 
   it('answers a combined Hey JR weekday command by voice exactly once', async () => {
@@ -204,7 +205,7 @@ describe('JR schedule MVP', () => {
     })
 
     const dialog = await screen.findByRole('dialog', { name: 'JR voice assistant' })
-    expect(within(dialog).getByRole('heading')).toHaveTextContent('Your Wednesday schedule')
+    expect(within(dialog).getByRole('heading')).toHaveTextContent('On Wednesday, you have 2 schedules')
     expect(window.speechSynthesis.speak).toHaveBeenCalledOnce()
     const spoken = vi.mocked(window.speechSynthesis.speak).mock.calls[0]?.[0]
     expect(spoken?.text).toContain('On Wednesday, you have 2 schedules')
@@ -213,8 +214,7 @@ describe('JR schedule MVP', () => {
   it('shows an honest empty answer when no schedule matches', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('button', { name: 'Talk to JR' }))
-    await user.type(screen.getByLabelText('Ask JR a schedule question'), 'Show my Sunday schedule')
+    await user.type(screen.getByLabelText('Ask JR about your schedule'), 'Show my Sunday schedule')
     await user.click(screen.getByRole('button', { name: 'Ask JR' }))
 
     expect(screen.getByRole('heading', { name: 'You have no schedules saved for Sunday.' })).toBeInTheDocument()

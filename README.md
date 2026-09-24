@@ -14,8 +14,9 @@ JR is a cross-platform personal voice-assistant project that remembers informati
 - Open JR manually and hear: “Hello, Marvin. How can I help you?”
 - Prefer an available male English system voice and use a slightly deeper pitch as fallback.
 - Opt in to “Hey JR” wake listening while the app is open, when the browser supports speech recognition.
-- Ask “What is my schedule on Wednesday?” and receive a spoken answer plus matching schedule cards.
+- Ask “What is my schedule on Wednesday?” and receive a grounded spoken answer from saved schedules.
 - Type the same question manually when speech recognition is unavailable.
+- Show only JR's portrait, speaking status, response, and close button in a focused voice pop-up.
 - Continue using every schedule feature when voice recognition is unavailable.
 
 The supplied circular JR portrait is used for both the app identity and the assistant popup. The area outside its black circle is transparent.

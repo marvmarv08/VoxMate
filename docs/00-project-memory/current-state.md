@@ -35,6 +35,7 @@ Validate the deployed app on Marvin's physical iPhone, then design platform-spec
 - Invalid imports fail atomically without changing existing schedule memory.
 - JR opens manually and speaks “Hello, Marvin. How can I help you?” through browser text-to-speech.
 - JR prefers an available male English system voice and uses a slightly deeper pitch as a fallback.
+- Active conversations use a focused centered pop-up containing only JR's portrait, speaking status, spoken response text, and close control; manual text questions remain on the main screen.
 - Supported browsers can opt in to in-app “Hey JR” recognition with visible listening and stop controls.
 - Unsupported recognition falls back cleanly to manual activation.
 - Weekly schedules can store weekday, start/end time, teacher, room, and notes alongside existing dated schedules.

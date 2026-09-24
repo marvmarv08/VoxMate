@@ -6,6 +6,10 @@ Skip when: You only need the active task or current state.
 
 ## 2026-09-24
 
+- Change: Simplified JR 0.3.0 conversations into a centered Siri-style voice pop-up matching Marvin's reference: dark card, large portrait and voice rings, speaking status, response text, and close control only. Moved the typed-question fallback onto the main screen.
+- Evidence: Type checking, lint, all 36 Vitest checks, production build, PWA browser smoke, an explicit non-full-screen dialog assertion, and visual inspection at 390 × 844 passed.
+- Remaining risk: Long schedule answers use a compact layout and may scroll within the pop-up on smaller physical iPhones.
+
 - Change: Corrected JR's deployment ownership. Removed both JR projects created under the incorrect `mark-lester` Vercel scope, verified the separate Vercel login as `marvmarv08`, and deployed JR 0.2.1 at `https://voice-assistant-black-eta.vercel.app` under Marvin's `cjmarv` scope.
 - Evidence: Vercel `whoami` returned `marvmarv08`; the wrong scope's project list no longer contains either JR project; the new production deployment reached READY; and the full live IndexedDB/PWA browser smoke passed.
 - Remaining risk: Vercel could not connect automatically to the private GitHub repository, so releases require a manual verified deployment until Marvin grants the Vercel GitHub integration access.

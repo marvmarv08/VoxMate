@@ -56,15 +56,6 @@ function App() {
   }, [schedules])
   const voice = useVoiceAssistant(resolveScheduleQuestion)
 
-  const answerWeekday = useMemo(
-    () => parseWeekdayScheduleQuery(voice.lastTranscript),
-    [voice.lastTranscript],
-  )
-  const answerSchedules = useMemo(
-    () => answerWeekday ? findSchedulesForWeekday(schedules, answerWeekday) : [],
-    [answerWeekday, schedules],
-  )
-
   useEffect(() => {
     let active = true
 
@@ -83,6 +74,15 @@ function App() {
     if (!storageReady) return
     void saveSchedules(schedules)
   }, [schedules, storageReady])
+
+  useEffect(() => {
+    if (!voice.assistantOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [voice.assistantOpen])
 
   const upcomingLabel = useMemo(() => {
     if (!storageReady) return 'Loading local memory…'
@@ -216,6 +216,20 @@ function App() {
               {voice.errorMessage && <p className="inline-error">{voice.errorMessage}</p>}
             </div>
           </div>
+
+          <form className="quick-question" onSubmit={handleQuestion}>
+            <label htmlFor="jr-question">Ask JR about your schedule</label>
+            <div>
+              <input
+                id="jr-question"
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+                placeholder="What is my schedule on Wednesday?"
+              />
+              <button type="submit">Ask JR</button>
+            </div>
+            <small>Use this text option when voice recognition is unavailable.</small>
+          </form>
         </section>
 
         <section className="memory-section" aria-labelledby="memory-title">
@@ -422,66 +436,29 @@ function App() {
       </aside>
 
       <footer>
-        <span>JR Voice Assistant · MVP 0.2.1</span>
+        <span>JR Voice Assistant · MVP 0.3.0</span>
         <span>Your schedule stays in local IndexedDB on this device.</span>
       </footer>
 
       {voice.assistantOpen && (
         <div className="assistant-backdrop" role="presentation" onMouseDown={voice.closeAssistant}>
+          <button className="dialog-close" type="button" onClick={voice.closeAssistant} aria-label="Close JR">
+            ×
+          </button>
           <section
-            className={`assistant-dialog ${answerWeekday ? 'has-schedule-answer' : ''}`}
+            className={`assistant-dialog ${voice.assistantMessage.length > 120 ? 'long-response' : ''}`}
             role="dialog"
             aria-modal="true"
             aria-label="JR voice assistant"
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <button className="dialog-close" type="button" onClick={voice.closeAssistant} aria-label="Close JR">
-              ×
-            </button>
             <div className="dialog-orb">
               <span />
               <span />
               <img src="/jr-avatar.png" alt="JR" />
             </div>
-            <p className="dialog-status">
-              {answerWeekday && answerSchedules.length > 0 ? 'JR FOUND YOUR SCHEDULE' : 'JR IS SPEAKING'}
-            </p>
-            <h2>
-              {answerWeekday && answerSchedules.length > 0
-                ? `Your ${answerWeekday} schedule`
-                : voice.assistantMessage}
-            </h2>
-            {answerWeekday && answerSchedules.length > 0 && (
-              <p className="dialog-summary">
-                {answerSchedules.length} {answerSchedules.length === 1 ? 'class' : 'classes'} saved
-              </p>
-            )}
-            {answerWeekday && answerSchedules.length > 0 && (
-              <ol className="assistant-results" aria-label={`${answerWeekday} schedules`}>
-                {answerSchedules.map((schedule) => (
-                  <li key={schedule.id}>
-                    <time>{formatScheduleTime(schedule.time)}</time>
-                    <span>
-                      <strong>{schedule.title}</strong>
-                      <small>{[schedule.room, schedule.teacher].filter(Boolean).join(' · ')}</small>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            )}
-            <form className="assistant-question" onSubmit={handleQuestion}>
-              <label htmlFor="jr-question">Ask JR a schedule question</label>
-              <div>
-                <input
-                  id="jr-question"
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  placeholder="What is my schedule on Wednesday?"
-                />
-                <button type="submit">Ask JR</button>
-              </div>
-            </form>
-            <p className="dialog-note">JR answers only from the schedules saved on this device.</p>
+            <p className="dialog-status">JR IS SPEAKING</p>
+            <h2>{voice.assistantMessage}</h2>
           </section>
         </div>
       )}
