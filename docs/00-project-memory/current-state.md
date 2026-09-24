@@ -19,7 +19,7 @@ Validate the deployed app on Marvin's physical iPhone, then design platform-spec
 - The first client is a React and TypeScript web app that can later be packaged for native platforms.
 - Marvin's circular portrait is the approved assistant identity.
 - Data remains on the current device in the MVP.
-- Production URL: `https://voice-assistant-ten-xi.vercel.app`.
+- Production URL: `https://voice-assistant-black-eta.vercel.app`, owned by the authenticated Vercel user `marvmarv08` under scope `cjmarv`.
 
 ## What Exists
 

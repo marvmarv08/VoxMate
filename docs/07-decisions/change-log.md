@@ -6,6 +6,10 @@ Skip when: You only need the active task or current state.
 
 ## 2026-09-24
 
+- Change: Corrected JR's deployment ownership. Removed both JR projects created under the incorrect `mark-lester` Vercel scope, verified the separate Vercel login as `marvmarv08`, and deployed JR 0.2.1 at `https://voice-assistant-black-eta.vercel.app` under Marvin's `cjmarv` scope.
+- Evidence: Vercel `whoami` returned `marvmarv08`; the wrong scope's project list no longer contains either JR project; the new production deployment reached READY; and the full live IndexedDB/PWA browser smoke passed.
+- Remaining risk: Vercel could not connect automatically to the private GitHub repository, so releases require a manual verified deployment until Marvin grants the Vercel GitHub integration access.
+
 - Change: Updated JR 0.2.1 to prefer male English system voices on iOS and other browsers, with a slightly slower rate and deeper pitch when only a generic English voice is available.
 - Evidence: Male-voice selection and fallback unit tests, type checking, lint, all 36 Vitest checks, and the production build passed.
 - Remaining risk: Exact voice names and sound vary by the voices installed on each device; Marvin must confirm the result on the physical iPhone.
