@@ -1,4 +1,4 @@
-# JR Voice Assistant
+# VoxMate
 
 JR is a cross-platform personal voice-assistant project that remembers information Marvin chooses to provide. The current MVP focuses on one dependable memory type: one-time and recurring weekly schedules.
 
